@@ -39,7 +39,6 @@ pub fn handle_events(todos: &mut Todos) -> std::io::Result<bool> {
                     due_date: String::new(),
                     done: false,
                 });
-                return Ok(true);
             }
         }
         _ => {}
