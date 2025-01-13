@@ -1,28 +1,10 @@
 use homedir::my_home;
-use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::fs::{exists, read_to_string};
 use todo_tui::{draw, handle_events};
 
+mod todo;
 mod todo_tui;
-
-#[derive(Serialize, Deserialize)]
-struct Todo {
-    title: String,
-    contents: String,
-    due_date: String,
-    done: bool,
-}
-
-impl fmt::Display for Todo {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "(\"{}\", \"{}\", \"{}\", {})",
-            self.title, self.contents, self.due_date, self.done
-        )
-    }
-}
+use todo::Todos;
 
 fn read_file() -> Option<String> {
     let home_dir = match my_home() {
@@ -47,26 +29,19 @@ fn read_file() -> Option<String> {
 
 fn main() {
     // Reading
-    let contents = match read_file() {
+    let file_contents = match read_file() {
         None => return,
         Some(contents) => contents,
     };
-    println!("{}", contents);
+    println!("{}", file_contents);
 
-    // Parsing
-    let t: Vec<Todo> = match serde_json::from_str(&contents) {
-        Ok(t) => t,
-        Err(e) => panic!("Problem opening the file: {e:?}"),
-    };
-    for todo in t {
-        println!("{}", todo);
-    }
+    let mut todos = Todos::new(file_contents);
 
     // TUI
     let mut terminal = ratatui::init();
     loop {
-        terminal.draw(draw).expect("failed to draw frame");
-        if matches!(handle_events(), Ok(true)) {
+        terminal.draw(draw).expect("Failed to draw frame");
+        if matches!(handle_events(&mut todos), Ok(true)) {
             break;
         }
     }
