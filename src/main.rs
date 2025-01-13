@@ -2,6 +2,9 @@ use homedir::my_home;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs::{exists, read_to_string};
+use todo_tui::{draw, handle_events};
+
+mod todo_tui;
 
 #[derive(Serialize, Deserialize)]
 struct Todo {
@@ -43,12 +46,14 @@ fn read_file() -> Option<String> {
 }
 
 fn main() {
+    // Reading
     let contents = match read_file() {
         None => return,
         Some(contents) => contents,
     };
     println!("{}", contents);
 
+    // Parsing
     let t: Vec<Todo> = match serde_json::from_str(&contents) {
         Ok(t) => t,
         Err(e) => panic!("Problem opening the file: {e:?}"),
@@ -56,4 +61,14 @@ fn main() {
     for todo in t {
         println!("{}", todo);
     }
+
+    // TUI
+    let mut terminal = ratatui::init();
+    loop {
+        terminal.draw(draw).expect("failed to draw frame");
+        if matches!(handle_events(), Ok(true)) {
+            break;
+        }
+    }
+    ratatui::restore();
 }
