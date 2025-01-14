@@ -1,29 +1,56 @@
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use crossterm::terminal::size;
+use ratatui::widgets::block::Position;
 use ratatui::{
-    layout::{Constraint, Layout},
-    widgets::Block,
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Style, Stylize},
+    widgets::{Block, Borders, List, ListDirection, ListItem, ListState, Paragraph},
     Frame,
 };
 
-use crate::todo::{Todo, Todos};
+use crate::todo::Todos;
 
 pub fn draw(frame: &mut Frame) {
-    use Constraint::Length;
+    use Constraint::{Length, Percentage};
 
     let term_size = match size() {
         Ok(term_size) => term_size,
         Err(_) => return,
     };
 
-    let vertical = Layout::vertical([Length(term_size.0)]);
-    let [title_area] = vertical.areas(frame.area());
+    let outer_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![Length(3), Percentage(100)])
+        .split(frame.area());
+
+    let inner_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![Percentage(40), Percentage(60)])
+        .split(outer_layout[1]);
 
     frame.render_widget(
-        Block::bordered()
+        Paragraph::new("Tabs").block(
+            Block::new()
+                .borders(Borders::ALL)
+                .border_type(ratatui::widgets::BorderType::Rounded)
+                .title("TODO List")
+                .title_alignment(ratatui::layout::Alignment::Center),
+        ),
+        outer_layout[0],
+    );
+    frame.render_widget(
+        Block::new()
+            .borders(Borders::ALL)
             .border_type(ratatui::widgets::BorderType::Rounded)
-            .title("TODO List"),
-        title_area,
+            .title("TODOs"),
+        inner_layout[0],
+    );
+    frame.render_widget(
+        Block::new()
+            .borders(Borders::ALL)
+            .border_type(ratatui::widgets::BorderType::Rounded)
+            .title("Contents"),
+        inner_layout[1],
     );
 }
 
@@ -33,12 +60,7 @@ pub fn handle_events(todos: &mut Todos) -> std::io::Result<bool> {
             if let KeyCode::Char('q') = key.code {
                 return Ok(true);
             } else if let KeyCode::Char('a') = key.code {
-                todos.add(Todo {
-                    title: String::new(),
-                    contents: String::new(),
-                    due_date: String::new(),
-                    done: false,
-                });
+                todos.add(String::new(), String::new(), String::new(), false);
             }
         }
         _ => {}

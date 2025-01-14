@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Serialize, Deserialize)]
-pub struct Todo {
+struct Todo {
     pub title: String,
     pub contents: String,
     pub due_date: String,
@@ -35,7 +35,12 @@ impl Todos {
         Self { todos: t }
     }
 
-    pub fn add(&mut self, todo: Todo) {
-        self.todos.push(todo);
+    pub fn add(&mut self, title: String, contents: String, due_date: String, done: bool) {
+        self.todos.push(Todo {
+            title,
+            contents,
+            due_date,
+            done,
+        });
     }
 }
