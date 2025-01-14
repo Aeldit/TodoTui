@@ -1,10 +1,7 @@
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use crossterm::terminal::size;
-use ratatui::widgets::block::Position;
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Style, Stylize},
-    widgets::{Block, Borders, List, ListDirection, ListItem, ListState, Paragraph},
+    layout::{Constraint, Direction, Layout},
+    widgets::{Block, Borders, Paragraph},
     Frame,
 };
 
@@ -12,11 +9,6 @@ use crate::todo::Todos;
 
 pub fn draw(frame: &mut Frame) {
     use Constraint::{Length, Percentage};
-
-    let term_size = match size() {
-        Ok(term_size) => term_size,
-        Err(_) => return,
-    };
 
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
