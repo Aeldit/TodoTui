@@ -16,9 +16,9 @@ pub fn draw(frame: &mut Frame, todos_state: &mut ListState, todos: &mut Todos) {
         .constraints(vec![Length(3), Percentage(100)])
         .split(frame.area());
 
-    let inner_layout = Layout::default()
+    let titles_contents_layout = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(vec![Percentage(40), Percentage(60)])
+        .constraints(vec![Percentage(35), Percentage(65)])
         .split(outer_layout[1]);
 
     frame.render_widget(
@@ -36,14 +36,14 @@ pub fn draw(frame: &mut Frame, todos_state: &mut ListState, todos: &mut Todos) {
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .title("TODOs"),
-        inner_layout[0],
+        titles_contents_layout[0],
     );
     frame.render_widget(
         Block::new()
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
             .title("Contents"),
-        inner_layout[1],
+        titles_contents_layout[1],
     );
 
     let list = List::new(todos.get_todos())
@@ -55,7 +55,7 @@ pub fn draw(frame: &mut Frame, todos_state: &mut ListState, todos: &mut Todos) {
         .highlight_style(Style::new().reversed())
         .repeat_highlight_symbol(true);
 
-    frame.render_stateful_widget(list, inner_layout[0], todos_state);
+    frame.render_stateful_widget(list, titles_contents_layout[0], todos_state);
 
     let p = Paragraph::new(
         todos
@@ -68,7 +68,7 @@ pub fn draw(frame: &mut Frame, todos_state: &mut ListState, todos: &mut Todos) {
             .title("Title")
             .border_type(BorderType::Rounded),
     );
-    frame.render_widget(p, inner_layout[1]);
+    frame.render_widget(p, titles_contents_layout[1]);
 }
 
 pub fn handle_events(todos: &mut Todos, todos_state: &mut ListState) -> std::io::Result<bool> {
