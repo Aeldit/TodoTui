@@ -6,6 +6,8 @@ mod todo;
 mod todo_tui;
 use todo::Todos;
 
+use ratatui::widgets::ListState;
+
 fn read_file() -> Option<String> {
     let home_dir = match my_home() {
         Ok(home_dir) => home_dir,
@@ -20,7 +22,6 @@ fn read_file() -> Option<String> {
 
     let file_exists = exists(&file_path);
     if file_exists.is_err() || file_exists.is_ok_and(|v| !v) {
-        println!("a");
         return None;
     }
 
@@ -28,20 +29,22 @@ fn read_file() -> Option<String> {
 }
 
 fn main() {
-    // Reading
     let file_contents = match read_file() {
         None => return,
         Some(contents) => contents,
     };
-    println!("{}", file_contents);
 
     let mut todos = Todos::new(file_contents);
 
     // TUI
     let mut terminal = ratatui::init();
+    let mut todos_state = ListState::default();
+    todos_state.select_first();
     loop {
-        terminal.draw(draw).expect("Failed to draw frame");
-        if matches!(handle_events(&mut todos), Ok(true)) {
+        terminal
+            .draw(|frame| draw(frame, &mut todos_state, &mut todos))
+            .expect("Failed to draw frame");
+        if matches!(handle_events(&mut todos, &mut todos_state), Ok(true)) {
             break;
         }
     }

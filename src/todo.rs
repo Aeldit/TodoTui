@@ -29,9 +29,6 @@ impl Todos {
             Ok(t) => t,
             Err(e) => panic!("Problem opening the file: {e:?}"),
         };
-        for todo in &t {
-            println!("{}", todo);
-        }
         Self { todos: t }
     }
 
@@ -42,5 +39,13 @@ impl Todos {
             due_date,
             done,
         });
+    }
+
+    pub fn get_todos(&mut self) -> Vec<String> {
+        let mut titles: Vec<String> = Vec::with_capacity(self.todos.len());
+        for todo in &self.todos {
+            titles.push(todo.title.clone());
+        }
+        titles
     }
 }
