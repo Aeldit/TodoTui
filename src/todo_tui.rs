@@ -56,6 +56,19 @@ pub fn draw(frame: &mut Frame, todos_state: &mut ListState, todos: &mut Todos) {
         .repeat_highlight_symbol(true);
 
     frame.render_stateful_widget(list, inner_layout[0], todos_state);
+
+    let p = Paragraph::new(
+        todos
+            .get_contents(todos_state.selected().unwrap())
+            .to_owned(),
+    )
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title("Title")
+            .border_type(BorderType::Rounded),
+    );
+    frame.render_widget(p, inner_layout[1]);
 }
 
 pub fn handle_events(todos: &mut Todos, todos_state: &mut ListState) -> std::io::Result<bool> {

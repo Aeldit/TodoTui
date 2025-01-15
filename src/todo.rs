@@ -48,4 +48,8 @@ impl Todos {
         }
         titles
     }
+
+    pub fn get_contents(&mut self, idx: usize) -> &String {
+        &self.todos.get(idx).unwrap().contents
+    }
 }

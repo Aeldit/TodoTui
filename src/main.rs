@@ -37,9 +37,10 @@ fn main() {
     let mut todos = Todos::new(file_contents);
 
     // TUI
-    let mut terminal = ratatui::init();
     let mut todos_state = ListState::default();
     todos_state.select_first();
+
+    let mut terminal = ratatui::init();
     loop {
         terminal
             .draw(|frame| draw(frame, &mut todos_state, &mut todos))
