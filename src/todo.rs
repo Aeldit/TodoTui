@@ -1,3 +1,4 @@
+use ratatui::widgets::ListState;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -51,5 +52,30 @@ impl Todos {
 
     pub fn get_contents(&mut self, idx: usize) -> &String {
         &self.todos.get(idx).unwrap().contents
+    }
+}
+
+pub struct States {
+    todo_list: ListState,
+    tabs: ListState,
+}
+
+impl States {
+    pub fn new() -> Self {
+        let mut ret = Self {
+            todo_list: ListState::default(),
+            tabs: ListState::default(),
+        };
+        ret.todo_list.select_first();
+        ret.tabs.select_first();
+        ret
+    }
+
+    pub fn get_todo_list(&mut self) -> &mut ListState {
+        &mut self.todo_list
+    }
+
+    pub fn get_tabs(&mut self) -> &mut ListState {
+        &mut self.tabs
     }
 }

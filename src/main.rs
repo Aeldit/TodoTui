@@ -4,9 +4,7 @@ use todo_tui::{draw, handle_events};
 
 mod todo;
 mod todo_tui;
-use todo::Todos;
-
-use ratatui::widgets::ListState;
+use todo::{States, Todos};
 
 fn read_file() -> Option<String> {
     let home_dir = match my_home() {
@@ -37,15 +35,14 @@ fn main() {
     let mut todos = Todos::new(file_contents);
 
     // TUI
-    let mut todos_state = ListState::default();
-    todos_state.select_first();
+    let mut states = States::new();
 
     let mut terminal = ratatui::init();
     loop {
         terminal
-            .draw(|frame| draw(frame, &mut todos_state, &mut todos))
+            .draw(|frame| draw(frame, &mut states, &mut todos))
             .expect("Failed to draw frame");
-        if matches!(handle_events(&mut todos, &mut todos_state), Ok(true)) {
+        if matches!(handle_events(&mut todos, &mut states), Ok(true)) {
             break;
         }
     }
