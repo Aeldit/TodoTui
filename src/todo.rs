@@ -74,8 +74,4 @@ impl States {
     pub fn get_todo_list(&mut self) -> &mut ListState {
         &mut self.todo_list
     }
-
-    pub fn get_tabs(&mut self) -> &mut ListState {
-        &mut self.tabs
-    }
 }
