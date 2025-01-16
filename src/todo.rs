@@ -10,6 +10,12 @@ struct Todo {
     pub done: bool,
 }
 
+impl Todo {
+    fn toggle(&mut self) {
+        self.done = !self.done;
+    }
+}
+
 impl fmt::Display for Todo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -69,10 +75,15 @@ impl Todos {
 
     pub fn is_done(&mut self, idx: usize) -> String {
         if self.todos.get(idx).unwrap().done {
-            String::from("Yes")
+            String::from("✅")
         } else {
-            String::from("No")
+            String::from("❌")
         }
+    }
+
+    pub fn toggle(&mut self, idx: usize) {
+        let todo = self.todos.get_mut(idx).unwrap();
+        todo.toggle();
     }
 }
 

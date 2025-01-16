@@ -13,7 +13,7 @@ use crate::todo::{States, Todos};
 fn display_bar_get_outer_layout(frame: &mut Frame) -> Rc<[Rect]> {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints(vec![Length(3), Percentage(100)])
+        .constraints(vec![Length(3), Percentage(100), Length(1)])
         .split(frame.area());
 
     frame.render_widget(
@@ -120,25 +120,35 @@ fn display_todo_contents(
         date_done_layout[1],
     );
 
-    let p = Paragraph::new(
-        todos
-            .get_description(states.get_todo_list().selected().unwrap())
-            .to_owned(),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .title(" Contents ")
-            .title_alignment(Alignment::Center)
-            .border_type(BorderType::Rounded),
+    frame.render_widget(
+        Paragraph::new(
+            todos
+                .get_description(states.get_todo_list().selected().unwrap())
+                .to_owned(),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(" Contents ")
+                .title_alignment(Alignment::Center)
+                .border_type(BorderType::Rounded),
+        ),
+        date_done_contents_layout[1],
     );
-    frame.render_widget(p, date_done_contents_layout[1]);
+}
+
+fn display_footer(frame: &mut Frame, outer_layout: Rc<[Rect]>) {
+    frame.render_widget(
+        Paragraph::new("t - toggle done | d - edit due date | c - edit description").centered(),
+        outer_layout[2],
+    );
 }
 
 pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     let outer_layout = display_bar_get_outer_layout(frame);
-    let todos_layout = display_bar_get_todo_layout(frame, outer_layout, todos, states);
+    let todos_layout = display_bar_get_todo_layout(frame, outer_layout.clone(), todos, states);
     display_todo_contents(frame, todos_layout, states, todos);
+    display_footer(frame, outer_layout);
 }
 
 pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<bool> {
@@ -149,6 +159,7 @@ pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<
                 KeyCode::Char('a') => todos.add(String::new(), String::new(), String::new(), false),
                 KeyCode::Down => states.get_todo_list().scroll_down_by(1),
                 KeyCode::Up => states.get_todo_list().scroll_up_by(1),
+                KeyCode::Char('t') => todos.toggle(states.get_todo_list().selected().unwrap()),
                 _ => {}
             }
         }
