@@ -45,13 +45,34 @@ impl Todos {
     pub fn get_todos(&mut self) -> Vec<String> {
         let mut titles: Vec<String> = Vec::with_capacity(self.todos.len());
         for todo in &self.todos {
-            titles.push(todo.title.clone());
+            if todo.done {
+                titles.push(format!("✔ {}", todo.title.clone()));
+            } else {
+                titles.push(format!("✘ {}", todo.title.clone()));
+            }
         }
         titles
     }
 
     pub fn get_contents(&mut self, idx: usize) -> &String {
         &self.todos.get(idx).unwrap().contents
+    }
+
+    pub fn get_due_date(&mut self, idx: usize) -> String {
+        let date = self.todos.get(idx).unwrap().due_date.clone();
+        if date.is_empty() {
+            String::from("N/A")
+        } else {
+            date
+        }
+    }
+
+    pub fn is_done(&mut self, idx: usize) -> String {
+        if self.todos.get(idx).unwrap().done {
+            String::from("Yes")
+        } else {
+            String::from("No")
+        }
     }
 }
 

@@ -1,16 +1,16 @@
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{
-    layout::{Alignment, Constraint, Direction, Layout},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Style, Stylize},
     widgets::{Block, BorderType, Borders, List, Paragraph},
     Frame,
 };
+use std::rc::Rc;
+use Constraint::{Length, Percentage};
 
 use crate::todo::{States, Todos};
 
-pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
-    use Constraint::{Length, Percentage};
-
+fn display_bar_get_outer_layout(frame: &mut Frame) -> Rc<[Rect]> {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![Length(3), Percentage(100)])
@@ -36,6 +36,11 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
             ),
         outer_layout[0],
     );
+    outer_layout
+}
+
+pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
+    let outer_layout = display_bar_get_outer_layout(frame);
 
     let todos_layout = Layout::default()
         .direction(Direction::Horizontal)
@@ -62,18 +67,45 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
 
     frame.render_stateful_widget(list, todos_layout[0], states.get_todo_list());
 
-    let date_contents_layout = Layout::default()
+    let date_done_contents_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![Length(3), Percentage(100)])
         .split(todos_layout[1]);
 
+    let date_done_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![Percentage(70), Percentage(30)])
+        .split(date_done_contents_layout[0]);
+
     frame.render_widget(
-        Block::new()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .title(" Due Date ")
-            .title_alignment(Alignment::Center),
-        date_contents_layout[0],
+        Paragraph::new(
+            todos
+                .get_due_date(states.get_todo_list().selected().unwrap())
+                .to_owned(),
+        )
+        .centered()
+        .block(
+            Block::bordered()
+                .border_type(BorderType::Rounded)
+                .title(" Due Date ")
+                .title_alignment(Alignment::Center),
+        ),
+        date_done_layout[0],
+    );
+    frame.render_widget(
+        Paragraph::new(
+            todos
+                .is_done(states.get_todo_list().selected().unwrap())
+                .to_owned(),
+        )
+        .centered()
+        .block(
+            Block::bordered()
+                .border_type(BorderType::Rounded)
+                .title(" Done ")
+                .title_alignment(Alignment::Center),
+        ),
+        date_done_layout[1],
     );
 
     let p = Paragraph::new(
@@ -88,7 +120,7 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
             .title_alignment(Alignment::Center)
             .border_type(BorderType::Rounded),
     );
-    frame.render_widget(p, date_contents_layout[1]);
+    frame.render_widget(p, date_done_contents_layout[1]);
 }
 
 pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<bool> {
