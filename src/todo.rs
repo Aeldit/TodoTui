@@ -87,23 +87,35 @@ impl Todos {
     }
 }
 
+pub enum Screens {
+    Main,
+    Create,
+}
+
 pub struct States {
     todo_list: ListState,
-    tabs: ListState,
+    screen: Screens,
 }
 
 impl States {
     pub fn new() -> Self {
         let mut ret = Self {
             todo_list: ListState::default(),
-            tabs: ListState::default(),
+            screen: Screens::Main,
         };
         ret.todo_list.select_first();
-        ret.tabs.select_first();
         ret
     }
 
     pub fn get_todo_list(&mut self) -> &mut ListState {
         &mut self.todo_list
+    }
+
+    pub fn get_screen(&mut self) -> &Screens {
+        &self.screen
+    }
+
+    pub fn set_screen(&mut self, screen: Screens) {
+        self.screen = screen;
     }
 }

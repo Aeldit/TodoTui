@@ -8,7 +8,7 @@ use ratatui::{
 use std::rc::Rc;
 use Constraint::{Length, Percentage};
 
-use crate::todo::{States, Todos};
+use crate::todo::{Screens, States, Todos};
 
 fn display_bar_get_outer_layout(frame: &mut Frame) -> Rc<[Rect]> {
     let outer_layout = Layout::default()
@@ -144,22 +144,51 @@ fn display_footer(frame: &mut Frame, outer_layout: Rc<[Rect]>) {
     );
 }
 
+fn display_create_ui(frame: &mut Frame) {
+    let horizontal_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![Percentage(50)])
+        .flex(ratatui::layout::Flex::Center)
+        .split(frame.area());
+    let vertical_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![Percentage(25)])
+        .flex(ratatui::layout::Flex::Start)
+        .vertical_margin(6)
+        .split(horizontal_layout[0]);
+
+    frame.render_widget(
+        Paragraph::new("Add TODO").block(Block::bordered().border_type(BorderType::Rounded)),
+        vertical_layout[0],
+    );
+}
+
 pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
-    let outer_layout = display_bar_get_outer_layout(frame);
-    let todos_layout = display_bar_get_todo_layout(frame, outer_layout.clone(), todos, states);
-    display_todo_contents(frame, todos_layout, states, todos);
-    display_footer(frame, outer_layout);
+    match states.get_screen() {
+        Screens::Create => display_create_ui(frame),
+        Screens::Main => {
+            let outer_layout = display_bar_get_outer_layout(frame);
+            let todos_layout =
+                display_bar_get_todo_layout(frame, outer_layout.clone(), todos, states);
+            display_todo_contents(frame, todos_layout, states, todos);
+            display_footer(frame, outer_layout);
+        }
+    }
 }
 
 pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<bool> {
     if let Event::Key(key) = event::read()? {
         if key.kind == KeyEventKind::Press {
             match key.code {
-                KeyCode::Char('q') => return Ok(true),
-                KeyCode::Char('a') => todos.add(String::new(), String::new(), String::new(), false),
+                KeyCode::Char('q') => match states.get_screen() {
+                    Screens::Main => return Ok(true),
+                    Screens::Create => states.set_screen(Screens::Main),
+                },
+                KeyCode::Char('a') => states.set_screen(Screens::Create),
                 KeyCode::Down => states.get_todo_list().scroll_down_by(1),
                 KeyCode::Up => states.get_todo_list().scroll_up_by(1),
                 KeyCode::Char('t') => todos.toggle(states.get_todo_list().selected().unwrap()),
+                KeyCode::Esc => states.set_screen(Screens::Main),
                 _ => {}
             }
         }
