@@ -60,8 +60,13 @@ impl Todos {
         titles
     }
 
-    pub fn get_description(&mut self, idx: usize) -> &String {
-        &self.todos.get(idx).unwrap().description
+    pub fn get_description(&mut self, idx: usize) -> String {
+        let date = self.todos.get(idx).unwrap().description.clone();
+        if date.is_empty() {
+            String::from("N/A")
+        } else {
+            date
+        }
     }
 
     pub fn get_due_date(&mut self, idx: usize) -> String {

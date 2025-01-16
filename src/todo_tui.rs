@@ -87,8 +87,7 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     );
 
     frame.render_widget(
-        Paragraph::new("q: quit | t: toggle done | d: edit due date | c: edit description")
-            .centered(),
+        Paragraph::new("q: quit | t: toggle done | e: edit TODO").centered(),
         outer_layout[2],
     );
 }
@@ -149,6 +148,8 @@ pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<
                         states.set_writting_mode(false);
                     } else if key.code == KeyCode::Backspace {
                         states.pop_char();
+                    } else if key.code.to_string().eq("Space") {
+                        states.add_char(' ');
                     } else if let Some(c) = key.code.to_string().chars().next() {
                         states.add_char(c);
                     }
