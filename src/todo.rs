@@ -5,7 +5,7 @@ use std::fmt;
 #[derive(Serialize, Deserialize)]
 struct Todo {
     pub title: String,
-    pub contents: String,
+    pub description: String,
     pub due_date: String,
     pub done: bool,
 }
@@ -15,7 +15,7 @@ impl fmt::Display for Todo {
         write!(
             f,
             "(\"{}\", \"{}\", \"{}\", {})",
-            self.title, self.contents, self.due_date, self.done
+            self.title, self.description, self.due_date, self.done
         )
     }
 }
@@ -36,7 +36,7 @@ impl Todos {
     pub fn add(&mut self, title: String, contents: String, due_date: String, done: bool) {
         self.todos.push(Todo {
             title,
-            contents,
+            description: contents,
             due_date,
             done,
         });
@@ -54,8 +54,8 @@ impl Todos {
         titles
     }
 
-    pub fn get_contents(&mut self, idx: usize) -> &String {
-        &self.todos.get(idx).unwrap().contents
+    pub fn get_description(&mut self, idx: usize) -> &String {
+        &self.todos.get(idx).unwrap().description
     }
 
     pub fn get_due_date(&mut self, idx: usize) -> String {

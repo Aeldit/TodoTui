@@ -39,9 +39,12 @@ fn display_bar_get_outer_layout(frame: &mut Frame) -> Rc<[Rect]> {
     outer_layout
 }
 
-pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
-    let outer_layout = display_bar_get_outer_layout(frame);
-
+fn display_bar_get_todo_layout(
+    frame: &mut Frame,
+    outer_layout: Rc<[Rect]>,
+    todos: &mut Todos,
+    states: &mut States,
+) -> Rc<[Rect]> {
     let todos_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![Percentage(35), Percentage(65)])
@@ -67,6 +70,15 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
 
     frame.render_stateful_widget(list, todos_layout[0], states.get_todo_list());
 
+    todos_layout
+}
+
+fn display_todo_contents(
+    frame: &mut Frame,
+    todos_layout: Rc<[Rect]>,
+    states: &mut States,
+    todos: &mut Todos,
+) {
     let date_done_contents_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![Length(3), Percentage(100)])
@@ -110,7 +122,7 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
 
     let p = Paragraph::new(
         todos
-            .get_contents(states.get_todo_list().selected().unwrap())
+            .get_description(states.get_todo_list().selected().unwrap())
             .to_owned(),
     )
     .block(
@@ -121,6 +133,12 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
             .border_type(BorderType::Rounded),
     );
     frame.render_widget(p, date_done_contents_layout[1]);
+}
+
+pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
+    let outer_layout = display_bar_get_outer_layout(frame);
+    let todos_layout = display_bar_get_todo_layout(frame, outer_layout, todos, states);
+    display_todo_contents(frame, todos_layout, states, todos);
 }
 
 pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<bool> {
