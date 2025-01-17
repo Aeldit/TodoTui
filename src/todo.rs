@@ -60,8 +60,22 @@ impl Todos {
 
     pub fn get_todos_titles(&mut self) -> Vec<String> {
         Vec::from_iter(self.todos.iter().map(|t| match t.done {
-            true => format!("✔ {}", t.title.clone()),
-            false => format!("✘ {}", t.title.clone()),
+            true => format!(
+                "✔ {}",
+                if t.title.is_empty() {
+                    String::from("N/A")
+                } else {
+                    t.title.clone()
+                }
+            ),
+            false => format!(
+                "✘ {}",
+                if t.title.is_empty() {
+                    String::from("N/A")
+                } else {
+                    t.title.clone()
+                }
+            ),
         }))
     }
 
