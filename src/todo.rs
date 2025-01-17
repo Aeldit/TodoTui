@@ -126,7 +126,7 @@ impl States {
     pub fn new() -> Self {
         let mut ret = Self {
             todo_list: ListState::default(),
-            screen: Screens::Create,
+            screen: Screens::Main,
             is_in_writting_mode: false,
             title_string: String::new(),
             date_string: String::new(),
