@@ -53,6 +53,11 @@ impl Todos {
         self.write();
     }
 
+    pub fn delete(&mut self, idx: usize) {
+        self.todos.remove(idx);
+        self.write();
+    }
+
     pub fn get_todos_titles(&mut self) -> Vec<String> {
         Vec::from_iter(self.todos.iter().map(|t| match t.done {
             true => format!("✔ {}", t.title.clone()),
@@ -75,16 +80,14 @@ impl Todos {
     }
 
     pub fn is_done(&mut self, idx: usize) -> String {
-        if self.todos.get(idx).unwrap().done {
-            String::from("✅")
-        } else {
-            String::from("❌")
+        match self.todos.get(idx).unwrap().done {
+            true => String::from("✅"),
+            false => String::from("❌"),
         }
     }
 
     pub fn toggle(&mut self, idx: usize) {
-        let todo = self.todos.get_mut(idx).unwrap();
-        todo.toggle();
+        self.todos.get_mut(idx).unwrap().toggle();
         self.write();
     }
 }

@@ -53,7 +53,7 @@ fn handle_main_ui_events(
         KeyCode::Down => states.get_todo_list().scroll_down_by(1),
         KeyCode::Up => states.get_todo_list().scroll_up_by(1),
         KeyCode::Char('t') => todos.toggle(states.get_todo_list().selected().unwrap()),
-        KeyCode::Char('d') => {}
+        KeyCode::Char('d') => todos.delete(states.get_todo_list().selected().unwrap()),
         _ => {}
     }
     Ok(false)

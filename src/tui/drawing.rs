@@ -40,12 +40,14 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
 
     frame.render_widget(CENTERED_BLOCK.title("TODOs"), todos_layout[0]);
 
-    let list = List::new(todos.get_todos_titles())
-        .block(BLOCK.title(" TODOs "))
-        .highlight_style(Style::new().reversed())
-        .repeat_highlight_symbol(true);
-
-    frame.render_stateful_widget(list, todos_layout[0], states.get_todo_list());
+    frame.render_stateful_widget(
+        List::new(todos.get_todos_titles())
+            .block(BLOCK.title(" TODOs "))
+            .highlight_style(Style::new().reversed())
+            .repeat_highlight_symbol(true),
+        todos_layout[0],
+        states.get_todo_list(),
+    );
 
     let date_done_contents_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -89,7 +91,7 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     );
 
     frame.render_widget(
-        Paragraph::new("q: quit | t: toggle done | e: edit TODO").centered(),
+        Paragraph::new("q: quit | t: toggle done | e: edit | d: delete").centered(),
         outer_layout[2],
     );
 }
