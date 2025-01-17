@@ -1,10 +1,13 @@
 use homedir::my_home;
 use std::fs::{exists, read_to_string};
-use todo_tui::{draw, handle_events};
 
+pub mod tui;
+use tui::{drawing::draw, events_handling::handle_events};
+
+mod states;
 mod todo;
-mod todo_tui;
-use todo::{States, Todos};
+use states::States;
+use todo::Todos;
 
 fn get_file_path(states: &mut States) -> String {
     let home_dir = match my_home() {
