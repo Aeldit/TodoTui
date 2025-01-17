@@ -7,7 +7,9 @@ use ratatui::{
 use Constraint::{Length, Percentage};
 
 use crate::{
-    states::{CreateTab, Screens, States, MAX_DATE_LEN, MAX_DESCRIPTION_LEN, MAX_TITLE_LEN},
+    states::{
+        CreateTab, Screens, States, ALL_KEY_EDIT, MAX_DATE_LEN, MAX_DESCRIPTION_LEN, MAX_TITLE_LEN,
+    },
     todo::Todos,
 };
 
@@ -109,7 +111,7 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
         .split(frame.area());
     let vertical_layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints(vec![Length(4), Percentage(100), Length(1)])
+        .constraints(vec![Length(4), Percentage(100), Length(1), Length(1)])
         .flex(ratatui::layout::Flex::Start)
         .vertical_margin(5)
         .split(horizontal_layout[0]);
@@ -178,14 +180,27 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
             .split(vertical_layout[1])[0],
     );
 
-    let footer = match states.is_in_writting_mode() {
-        true => "Esc: exit writting mode",
-        false => "q/Esc: quit | Tab: change box | i: edit | a: add the TODO",
-    };
     frame.render_widget(
-        Paragraph::new(footer).centered().fg(BG_COLOR),
+        Paragraph::new(match states.is_in_writting_mode() {
+            true => String::from("Esc: exit writting mode"),
+            false => format!(
+                "q/Esc: quit | Tab: cycle tab | {}: edit | a: add the TODO",
+                ALL_KEY_EDIT
+            ),
+        })
+        .centered()
+        .fg(BG_COLOR),
         vertical_layout[2],
     );
+    /*frame.render_widget(
+        Paragraph::new(match states.is_in_writting_mode() {
+            true => String::from("Esc: exit writting mode"),
+            false => format!("{}: paste | {}: copy", ALL_KEY_PASTE, ALL_KEY_COPY),
+        })
+        .centered()
+        .fg(BG_COLOR),
+        vertical_layout[3],
+    );*/
 }
 
 pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {

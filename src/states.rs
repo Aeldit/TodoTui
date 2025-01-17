@@ -4,6 +4,11 @@ pub const MAX_TITLE_LEN: usize = 32;
 pub const MAX_DATE_LEN: usize = 32;
 pub const MAX_DESCRIPTION_LEN: usize = 4096;
 
+pub const ALL_KEY_EDIT: char = 'i';
+// TODO: Implement copy/paste
+// pub const ALL_KEY_COPY: char = 'c';
+// pub const ALL_KEY_PASTE: char = 'p';
+
 pub enum Screens {
     Main,
     Create,
@@ -94,6 +99,27 @@ impl States {
             CreateTab::Description => {
                 if self.description_string.len() < MAX_DESCRIPTION_LEN {
                     self.description_string.push(c);
+                }
+            }
+        }
+    }
+
+    pub fn add_str(&mut self, s: &str) {
+        println!("{}", s);
+        match self.selected_tab {
+            CreateTab::Title => {
+                if self.title_string.len() + s.len() < MAX_TITLE_LEN {
+                    self.title_string.push_str(s);
+                }
+            }
+            CreateTab::Date => {
+                if self.date_string.len() + s.len() < MAX_DATE_LEN {
+                    self.date_string.push_str(s);
+                }
+            }
+            CreateTab::Description => {
+                if self.description_string.len() + s.len() < MAX_DESCRIPTION_LEN {
+                    self.description_string.push_str(s);
                 }
             }
         }
