@@ -1,13 +1,13 @@
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Style, Stylize},
-    widgets::{Block, BorderType, List, Paragraph},
+    widgets::{block::Title, Block, BorderType, List, Paragraph, Wrap},
     Frame,
 };
 use Constraint::{Length, Percentage};
 
 use crate::{
-    states::{CreateTab, Screens, States},
+    states::{CreateTab, Screens, States, MAX_DATE_LEN, MAX_DESCRIPTION_LEN, MAX_TITLE_LEN},
     todo::Todos,
 };
 
@@ -88,6 +88,7 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     frame.render_widget(
         Paragraph::new(description)
             .style(TEXT_STYLE)
+            .wrap(Wrap { trim: true })
             .block(BLOCK.title(" Contents ").fg(BG_COLOR)),
         date_done_contents_layout[1],
     );
@@ -108,7 +109,7 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
         .split(frame.area());
     let vertical_layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints(vec![Length(4), Percentage(100)])
+        .constraints(vec![Length(4), Percentage(100), Length(1)])
         .flex(ratatui::layout::Flex::Start)
         .vertical_margin(5)
         .split(horizontal_layout[0]);
@@ -119,32 +120,71 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
         .split(vertical_layout[0]);
 
     frame.render_widget(
-        Paragraph::new(String::from(states.get_title())).block(
-            BLOCK
-                .title(" Title ")
-                .border_style(Style::default().fg(states.get_fg_color_for_tab(CreateTab::Title))),
-        ),
+        Paragraph::new(String::from(states.get_title()))
+            .wrap(Wrap { trim: true })
+            .block(
+                BLOCK
+                    .title(" Title ")
+                    .title(Title::from(format!(
+                        " {}/{} ",
+                        states.get_nb_char_in_tab(CreateTab::Title),
+                        MAX_TITLE_LEN,
+                    )))
+                    .style(TEXT_STYLE)
+                    .border_style(
+                        Style::default().fg(states.get_fg_color_for_tab(CreateTab::Title)),
+                    ),
+            ),
         title_date_done_layout[0],
     );
     frame.render_widget(
-        Paragraph::new(String::from(states.get_date())).block(
-            BLOCK
-                .title(" Due Date ")
-                .border_style(Style::default().fg(states.get_fg_color_for_tab(CreateTab::Date))),
-        ),
+        Paragraph::new(String::from(states.get_date()))
+            .wrap(Wrap { trim: true })
+            .block(
+                BLOCK
+                    .title(" Due Date ")
+                    .title(Title::from(format!(
+                        " {}/{} ",
+                        states.get_nb_char_in_tab(CreateTab::Date),
+                        MAX_DATE_LEN,
+                    )))
+                    .style(TEXT_STYLE)
+                    .border_style(
+                        Style::default().fg(states.get_fg_color_for_tab(CreateTab::Date)),
+                    ),
+            ),
         title_date_done_layout[1],
     );
 
     frame.render_widget(
-        Paragraph::new(String::from(states.get_description())).block(
-            BLOCK.title(" Description ").border_style(
-                Style::default().fg(states.get_fg_color_for_tab(CreateTab::Description)),
-            ),
-        ),
+        Paragraph::new(String::from(states.get_description()))
+            .wrap(Wrap { trim: true })
+            .block(
+                BLOCK
+                    .title(" Description ")
+                    .title(Title::from(format!(
+                        " {}/{} ",
+                        states.get_nb_char_in_tab(CreateTab::Description),
+                        MAX_DESCRIPTION_LEN,
+                    )))
+                    .border_style(
+                        Style::default().fg(states.get_fg_color_for_tab(CreateTab::Description)),
+                    ),
+            )
+            .style(TEXT_STYLE),
         Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Percentage(100)])
             .split(vertical_layout[1])[0],
+    );
+
+    let footer = match states.is_in_writting_mode() {
+        true => "Esc: exit writting mode",
+        false => "q/Esc: quit | Tab: change box | i: edit | a: add the TODO",
+    };
+    frame.render_widget(
+        Paragraph::new(footer).centered().fg(BG_COLOR),
+        vertical_layout[2],
     );
 }
 

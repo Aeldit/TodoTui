@@ -25,7 +25,7 @@ fn handle_create_ui_events(todos: &mut Todos, states: &mut States, key: KeyEvent
     } else {
         match key.code {
             KeyCode::Esc | KeyCode::Char('q') => states.set_screen(Screens::Main),
-            KeyCode::Enter => states.set_writting_mode(true),
+            KeyCode::Char('i') => states.set_writting_mode(true),
             KeyCode::Tab => states.next_tab(),
             KeyCode::Char('a') => {
                 todos.add(

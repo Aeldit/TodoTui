@@ -1,5 +1,9 @@
 use ratatui::{style::Color, widgets::ListState};
 
+pub const MAX_TITLE_LEN: usize = 32;
+pub const MAX_DATE_LEN: usize = 32;
+pub const MAX_DESCRIPTION_LEN: usize = 4096;
+
 pub enum Screens {
     Main,
     Create,
@@ -77,9 +81,21 @@ impl States {
 
     pub fn add_char(&mut self, c: char) {
         match self.selected_tab {
-            CreateTab::Title => self.title_string.push(c),
-            CreateTab::Date => self.date_string.push(c),
-            CreateTab::Description => self.description_string.push(c),
+            CreateTab::Title => {
+                if self.title_string.len() < MAX_TITLE_LEN {
+                    self.title_string.push(c);
+                }
+            }
+            CreateTab::Date => {
+                if self.date_string.len() < MAX_DATE_LEN {
+                    self.date_string.push(c);
+                }
+            }
+            CreateTab::Description => {
+                if self.description_string.len() < MAX_DESCRIPTION_LEN {
+                    self.description_string.push(c);
+                }
+            }
         }
     }
 
@@ -89,6 +105,14 @@ impl States {
             CreateTab::Date => self.date_string.pop(),
             CreateTab::Description => self.description_string.pop(),
         };
+    }
+
+    pub fn get_nb_char_in_tab(&mut self, tab: CreateTab) -> usize {
+        match tab {
+            CreateTab::Title => self.title_string.len(),
+            CreateTab::Date => self.date_string.len(),
+            CreateTab::Description => self.description_string.len(),
+        }
     }
 
     pub fn next_tab(&mut self) {
