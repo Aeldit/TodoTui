@@ -1,6 +1,6 @@
-use ratatui::widgets::ListState;
+use ratatui::{style::Color, widgets::ListState};
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::{fs::File, io::Write};
 
 #[derive(Serialize, Deserialize)]
 struct Todo {
@@ -16,27 +16,32 @@ impl Todo {
     }
 }
 
-impl fmt::Display for Todo {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "(\"{}\", \"{}\", \"{}\", {})",
-            self.title, self.description, self.due_date, self.done
-        )
-    }
-}
-
 pub struct Todos {
     todos: Vec<Todo>,
+    file_path: String,
 }
 
 impl Todos {
-    pub fn new(file_contents: String) -> Todos {
-        let t: Vec<Todo> = match serde_json::from_str(&file_contents) {
+    pub fn new(file_contents: String, file_path: String) -> Todos {
+        let todos: Vec<Todo> = match serde_json::from_str(&file_contents) {
             Ok(t) => t,
             Err(e) => panic!("Problem opening the file: {e:?}"),
         };
-        Self { todos: t }
+        Self { todos, file_path }
+    }
+
+    pub fn write(&mut self) {
+        let mut file = File::create(&self.file_path).unwrap();
+        if file
+            .write_all(
+                serde_json::to_string_pretty(&self.todos)
+                    .unwrap()
+                    .as_bytes(),
+            )
+            .is_err()
+        {
+            panic!("Couldn't write to the file '{}'", self.file_path)
+        }
     }
 
     pub fn add(&mut self, title: String, contents: String, due_date: String, done: bool) {
@@ -46,6 +51,7 @@ impl Todos {
             due_date,
             done,
         });
+        self.write();
     }
 
     pub fn get_todos(&mut self) -> Vec<String> {
@@ -89,6 +95,7 @@ impl Todos {
     pub fn toggle(&mut self, idx: usize) {
         let todo = self.todos.get_mut(idx).unwrap();
         todo.toggle();
+        self.write();
     }
 }
 
@@ -97,7 +104,8 @@ pub enum Screens {
     Create,
 }
 
-pub enum CurrentString {
+#[derive(PartialEq)]
+pub enum CreateTab {
     Title,
     Date,
     Description,
@@ -110,7 +118,8 @@ pub struct States {
     title_string: String,
     date_string: String,
     description_string: String,
-    current_string: CurrentString,
+    selected_tab: CreateTab,
+    file_path: String,
 }
 
 impl States {
@@ -122,7 +131,8 @@ impl States {
             title_string: String::new(),
             date_string: String::new(),
             description_string: String::new(),
-            current_string: CurrentString::Title,
+            selected_tab: CreateTab::Title,
+            file_path: String::new(),
         };
         ret.todo_list.select_first();
         ret
@@ -160,27 +170,31 @@ impl States {
         self.is_in_writting_mode = value;
     }
 
+    pub fn set_file_path(&mut self, file_path: String) {
+        self.file_path = file_path
+    }
+
     pub fn add_char(&mut self, c: char) {
-        match self.current_string {
-            CurrentString::Title => self.title_string.push(c),
-            CurrentString::Date => self.date_string.push(c),
-            CurrentString::Description => self.description_string.push(c),
+        match self.selected_tab {
+            CreateTab::Title => self.title_string.push(c),
+            CreateTab::Date => self.date_string.push(c),
+            CreateTab::Description => self.description_string.push(c),
         }
     }
 
     pub fn pop_char(&mut self) {
-        match self.current_string {
-            CurrentString::Title => self.title_string.pop(),
-            CurrentString::Date => self.date_string.pop(),
-            CurrentString::Description => self.description_string.pop(),
+        match self.selected_tab {
+            CreateTab::Title => self.title_string.pop(),
+            CreateTab::Date => self.date_string.pop(),
+            CreateTab::Description => self.description_string.pop(),
         };
     }
 
     pub fn next_tab(&mut self) {
-        self.current_string = match self.current_string {
-            CurrentString::Title => CurrentString::Date,
-            CurrentString::Date => CurrentString::Description,
-            CurrentString::Description => CurrentString::Title,
+        self.selected_tab = match self.selected_tab {
+            CreateTab::Title => CreateTab::Date,
+            CreateTab::Date => CreateTab::Description,
+            CreateTab::Description => CreateTab::Title,
         }
     }
 
@@ -188,5 +202,12 @@ impl States {
         self.title_string.clear();
         self.date_string.clear();
         self.description_string.clear();
+    }
+
+    pub fn get_fg_color_for_tab(&mut self, tab: CreateTab) -> Color {
+        if tab == self.selected_tab {
+            return Color::Red;
+        }
+        Color::Magenta
     }
 }

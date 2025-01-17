@@ -7,7 +7,7 @@ use ratatui::{
 };
 use Constraint::{Length, Percentage};
 
-use crate::todo::{Screens, States, Todos};
+use crate::todo::{CreateTab, Screens, States, Todos};
 
 const BLOCK: Block = Block::bordered().border_type(BorderType::Rounded);
 const CENTERED_BLOCK: Block = BLOCK.title_alignment(Alignment::Center);
@@ -111,16 +111,28 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
         .split(vertical_layout[0]);
 
     frame.render_widget(
-        Paragraph::new(String::from(states.get_title())).block(BLOCK.title(" Title ")),
+        Paragraph::new(String::from(states.get_title())).block(
+            BLOCK
+                .title(" Title ")
+                .border_style(Style::default().fg(states.get_fg_color_for_tab(CreateTab::Title))),
+        ),
         title_date_done_layout[0],
     );
     frame.render_widget(
-        Paragraph::new(String::from(states.get_date())).block(BLOCK.title(" Due Date ")),
+        Paragraph::new(String::from(states.get_date())).block(
+            BLOCK
+                .title(" Due Date ")
+                .border_style(Style::default().fg(states.get_fg_color_for_tab(CreateTab::Date))),
+        ),
         title_date_done_layout[1],
     );
 
     frame.render_widget(
-        Paragraph::new(String::from(states.get_description())).block(BLOCK.title(" Description ")),
+        Paragraph::new(String::from(states.get_description())).block(
+            BLOCK.title(" Description ").border_style(
+                Style::default().fg(states.get_fg_color_for_tab(CreateTab::Description)),
+            ),
+        ),
         Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Percentage(100)])
@@ -148,10 +160,16 @@ pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<
                         states.set_writting_mode(false);
                     } else if key.code == KeyCode::Backspace {
                         states.pop_char();
-                    } else if key.code.to_string().eq("Space") {
-                        states.add_char(' ');
-                    } else if let Some(c) = key.code.to_string().chars().next() {
-                        states.add_char(c);
+                    } else {
+                        match key.code.to_string().as_str() {
+                            "Space" => states.add_char(' '),
+                            "Tab" => states.add_char('\t'),
+                            _ => {
+                                if let Some(c) = key.code.to_string().chars().next() {
+                                    states.add_char(c);
+                                }
+                            }
+                        }
                     }
                 } else {
                     match key.code {
