@@ -1,6 +1,6 @@
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout},
-    style::{Style, Stylize},
+    style::{Color, Style, Stylize},
     widgets::{Block, BorderType, List, Paragraph},
     Frame,
 };
@@ -14,6 +14,10 @@ use crate::{
 const BLOCK: Block = Block::bordered().border_type(BorderType::Rounded);
 const CENTERED_BLOCK: Block = BLOCK.title_alignment(Alignment::Center);
 
+const BG_COLOR: Color = Color::Magenta;
+const ACTIVE_COLOR: Color = Color::Red;
+const TEXT_STYLE: Style = Style::new().fg(ACTIVE_COLOR);
+
 fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -23,7 +27,8 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     frame.render_widget(
         Paragraph::new(format!(" {}", env!("CARGO_PKG_NAME")))
             .left_aligned()
-            .block(CENTERED_BLOCK),
+            .block(CENTERED_BLOCK)
+            .fg(BG_COLOR),
         outer_layout[0],
     );
     frame.render_widget(
@@ -38,11 +43,10 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
         .constraints(vec![Percentage(35), Percentage(65)])
         .split(outer_layout[1]);
 
-    frame.render_widget(CENTERED_BLOCK.title("TODOs"), todos_layout[0]);
-
     frame.render_stateful_widget(
         List::new(todos.get_todos_titles())
-            .block(BLOCK.title(" TODOs "))
+            .block(BLOCK.title(" TODOs ").fg(BG_COLOR))
+            .style(TEXT_STYLE)
             .highlight_style(Style::new().reversed())
             .repeat_highlight_symbol(true),
         todos_layout[0],
@@ -70,22 +74,28 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     frame.render_widget(
         Paragraph::new(due_date)
             .centered()
-            .block(CENTERED_BLOCK.title(" Due Date ")),
+            .style(TEXT_STYLE)
+            .block(CENTERED_BLOCK.title(" Due Date ").fg(BG_COLOR)),
         date_done_layout[0],
     );
     frame.render_widget(
         Paragraph::new(is_done)
             .centered()
-            .block(CENTERED_BLOCK.title(" Done ")),
+            .style(TEXT_STYLE)
+            .block(CENTERED_BLOCK.title(" Done ").fg(BG_COLOR)),
         date_done_layout[1],
     );
     frame.render_widget(
-        Paragraph::new(description).block(BLOCK.title(" Contents ")),
+        Paragraph::new(description)
+            .style(TEXT_STYLE)
+            .block(BLOCK.title(" Contents ").fg(BG_COLOR)),
         date_done_contents_layout[1],
     );
 
     frame.render_widget(
-        Paragraph::new("q: quit | t: toggle done | e: edit | d: delete").centered(),
+        Paragraph::new("q: quit | t: toggle done | e: edit | d: delete")
+            .centered()
+            .fg(BG_COLOR),
         outer_layout[2],
     );
 }
