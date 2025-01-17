@@ -35,9 +35,12 @@ fn main() {
 
     let file_exists = exists(&file_path);
     if file_exists.is_err() || file_exists.is_ok_and(|v| !v) {
-        return;
+        match std::fs::File::create(&file_path) {
+            Ok(_) => {}
+            Err(_) => panic!("The file '{}' does not exist", file_path),
+        }
     };
-    let file_contents = read_to_string(&file_path).expect("Couldn't read the file");
+    let file_contents = read_to_string(&file_path).unwrap(); //.expect("Couldn't read the file");
 
     let mut todos = Todos::new(file_contents, file_path);
 

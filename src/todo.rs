@@ -22,24 +22,24 @@ pub struct Todos {
 
 impl Todos {
     pub fn new(file_contents: String, file_path: String) -> Todos {
-        let todos: Vec<Todo> = match serde_json::from_str(&file_contents) {
-            Ok(t) => t,
-            Err(e) => panic!("Problem opening the file: {e:?}"),
-        };
-        Self { todos, file_path }
+        Self {
+            todos: serde_json::from_str(&file_contents).unwrap_or_default(),
+            file_path,
+        }
     }
 
     pub fn write(&mut self) {
-        if File::create(&self.file_path)
-            .unwrap()
-            .write_all(
-                serde_json::to_string_pretty(&self.todos)
-                    .unwrap()
-                    .as_bytes(),
-            )
-            .is_err()
-        {
-            println!("Couldn't write to the file '{}'", self.file_path)
+        match File::create(&self.file_path) {
+            Ok(mut file) => {
+                if let Ok(json_str) = serde_json::to_string_pretty(&self.todos) {
+                    if file.write_all(json_str.as_bytes()).is_err() {
+                        println!("couldn't write to the file '{}'", self.file_path)
+                    }
+                }
+            }
+            Err(_) => {
+                println!("couldn't open/create to the file '{}'", self.file_path);
+            }
         }
     }
 
@@ -66,28 +66,39 @@ impl Todos {
     }
 
     pub fn get_description(&mut self, idx: usize) -> String {
-        match self.todos.get(idx).unwrap().description.is_empty() {
-            true => String::from("N/A"),
-            false => self.todos.get(idx).unwrap().description.clone(),
+        match self.todos.get(idx) {
+            Some(todo) => match todo.description.is_empty() {
+                true => String::from("N/A"),
+                false => self.todos.get(idx).unwrap().description.clone(),
+            },
+            None => String::from("N/A"),
         }
     }
 
     pub fn get_due_date(&mut self, idx: usize) -> String {
-        match self.todos.get(idx).unwrap().due_date.is_empty() {
-            true => String::from("N/A"),
-            false => self.todos.get(idx).unwrap().due_date.clone(),
+        match self.todos.get(idx) {
+            Some(todo) => match todo.due_date.is_empty() {
+                true => String::from("N/A"),
+                false => self.todos.get(idx).unwrap().due_date.clone(),
+            },
+            None => String::from("N/A"),
         }
     }
 
     pub fn is_done(&mut self, idx: usize) -> String {
-        match self.todos.get(idx).unwrap().done {
-            true => String::from("✅"),
-            false => String::from("❌"),
+        match self.todos.get(idx) {
+            Some(todo) => match todo.done {
+                true => String::from("✅"),
+                false => String::from("❌"),
+            },
+            None => String::from("N/A"),
         }
     }
 
     pub fn toggle(&mut self, idx: usize) {
-        self.todos.get_mut(idx).unwrap().toggle();
-        self.write();
+        if let Some(todo) = self.todos.get_mut(idx) {
+            todo.toggle();
+            self.write();
+        }
     }
 }
