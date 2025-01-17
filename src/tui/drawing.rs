@@ -59,34 +59,28 @@ fn display_main_ui(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
         .constraints(vec![Percentage(70), Percentage(30)])
         .split(date_done_contents_layout[0]);
 
+    let mut description = String::new();
+    let mut due_date = String::new();
+    let mut is_done = String::new();
+    if let Some(idx) = states.get_todo_list().selected() {
+        description.push_str(&todos.get_description(idx));
+        due_date.push_str(&todos.get_due_date(idx));
+        is_done.push_str(&todos.is_done(idx));
+    }
     frame.render_widget(
-        Paragraph::new(
-            todos
-                .get_due_date(states.get_todo_list().selected().unwrap())
-                .to_owned(),
-        )
-        .centered()
-        .block(CENTERED_BLOCK.title(" Due Date ")),
+        Paragraph::new(due_date)
+            .centered()
+            .block(CENTERED_BLOCK.title(" Due Date ")),
         date_done_layout[0],
     );
     frame.render_widget(
-        Paragraph::new(
-            todos
-                .is_done(states.get_todo_list().selected().unwrap())
-                .to_owned(),
-        )
-        .centered()
-        .block(CENTERED_BLOCK.title(" Done ")),
+        Paragraph::new(is_done)
+            .centered()
+            .block(CENTERED_BLOCK.title(" Done ")),
         date_done_layout[1],
     );
-
     frame.render_widget(
-        Paragraph::new(
-            todos
-                .get_description(states.get_todo_list().selected().unwrap())
-                .to_owned(),
-        )
-        .block(BLOCK.title(" Contents ")),
+        Paragraph::new(description).block(BLOCK.title(" Contents ")),
         date_done_contents_layout[1],
     );
 
