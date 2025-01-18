@@ -43,6 +43,10 @@ impl Todos {
         self.todos.get(idx)
     }
 
+    pub fn get_nb_todos(&mut self) -> usize {
+        self.todos.len()
+    }
+
     pub fn add(&mut self, title: String, description: String, due_date: String, done: bool) {
         self.todos.push(Todo {
             title,

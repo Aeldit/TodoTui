@@ -51,6 +51,7 @@ impl States {
         ret
     }
 
+    // Getters
     pub fn get_todo_list(&mut self) -> &mut ListState {
         &mut self.todo_list
     }
@@ -75,6 +76,7 @@ impl States {
         &self.description_string
     }
 
+    // Setters
     pub fn set_screen(&mut self, screen: Screens) {
         self.screen = screen;
     }
@@ -108,7 +110,6 @@ impl States {
     }
 
     pub fn add_str(&mut self, s: &str) {
-        println!("{}", s);
         match self.selected_tab {
             CreateTab::Title => {
                 if self.title_string.len() + s.len() < MAX_TITLE_LEN {
@@ -173,6 +174,26 @@ impl States {
             return Color::Red;
         }
         Color::Magenta
+    }
+
+    pub fn scroll_down(&mut self, todos: &mut Todos) {
+        if let Some(idx) = self.todo_list.selected() {
+            if idx == todos.get_nb_todos() - 1 {
+                self.todo_list.select_first();
+            } else {
+                self.todo_list.select_next();
+            }
+        }
+    }
+
+    pub fn scroll_up(&mut self) {
+        if let Some(idx) = self.todo_list.selected() {
+            if idx == 0 {
+                self.todo_list.select_last();
+            } else {
+                self.todo_list.select_previous();
+            }
+        }
     }
 }
 

@@ -56,8 +56,8 @@ fn handle_main_ui_events(
     match key.code {
         KeyCode::Char('q') => return Ok(true),
         KeyCode::Char('a') => states.set_screen(Screens::Create),
-        KeyCode::Down => states.get_todo_list().scroll_down_by(1),
-        KeyCode::Up => states.get_todo_list().scroll_up_by(1),
+        KeyCode::Down => states.scroll_down(todos),
+        KeyCode::Up => states.scroll_up(),
         KeyCode::Char('t') => todos.toggle(states.get_todo_list().selected().unwrap()),
         KeyCode::Char('d') => todos.delete(states.get_todo_list().selected().unwrap()),
         KeyCode::Char(ALL_KEY_EDIT) => {
