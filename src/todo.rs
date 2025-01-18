@@ -1,18 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io::Write};
 
+use crate::states::States;
+
 #[derive(Serialize, Deserialize)]
-struct Todo {
+pub struct Todo {
     pub title: String,
     pub description: String,
     pub due_date: String,
     pub done: bool,
-}
-
-impl Todo {
-    fn toggle(&mut self) {
-        self.done = !self.done;
-    }
 }
 
 pub struct Todos {
@@ -43,14 +39,27 @@ impl Todos {
         }
     }
 
-    pub fn add(&mut self, title: String, contents: String, due_date: String, done: bool) {
+    pub fn get_todo(&mut self, idx: usize) -> Option<&Todo> {
+        self.todos.get(idx)
+    }
+
+    pub fn add(&mut self, title: String, description: String, due_date: String, done: bool) {
         self.todos.push(Todo {
             title,
-            description: contents,
+            description,
             due_date,
             done,
         });
         self.write();
+    }
+
+    pub fn edit(&mut self, idx: usize, states: &mut States) {
+        if let Some(todo) = self.todos.get_mut(idx) {
+            todo.title = String::from(states.get_title());
+            todo.description = String::from(states.get_description());
+            todo.due_date = String::from(states.get_date());
+            self.write();
+        }
     }
 
     pub fn delete(&mut self, idx: usize) {
@@ -111,7 +120,7 @@ impl Todos {
 
     pub fn toggle(&mut self, idx: usize) {
         if let Some(todo) = self.todos.get_mut(idx) {
-            todo.toggle();
+            todo.done = !todo.done;
             self.write();
         }
     }

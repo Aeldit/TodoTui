@@ -1,10 +1,12 @@
 use ratatui::{style::Color, widgets::ListState};
 
+use crate::todo::Todos;
+
 pub const MAX_TITLE_LEN: usize = 32;
 pub const MAX_DATE_LEN: usize = 32;
 pub const MAX_DESCRIPTION_LEN: usize = 4096;
 
-pub const ALL_KEY_EDIT: char = 'i';
+pub const ALL_KEY_EDIT: char = 'e';
 // TODO: Implement copy/paste
 // pub const ALL_KEY_COPY: char = 'c';
 // pub const ALL_KEY_PASTE: char = 'p';
@@ -12,6 +14,7 @@ pub const ALL_KEY_EDIT: char = 'i';
 pub enum Screens {
     Main,
     Create,
+    Edit,
 }
 
 #[derive(PartialEq)]
@@ -121,6 +124,16 @@ impl States {
                 if self.description_string.len() + s.len() < MAX_DESCRIPTION_LEN {
                     self.description_string.push_str(s);
                 }
+            }
+        }
+    }
+
+    pub fn init_edit_mode(&mut self, todos: &mut Todos) {
+        if let Some(idx) = self.todo_list.selected() {
+            if let Some(todo) = &todos.get_todo(idx) {
+                self.title_string.push_str(&todo.title);
+                self.date_string.push_str(&todo.due_date);
+                self.description_string.push_str(&todo.description);
             }
         }
     }

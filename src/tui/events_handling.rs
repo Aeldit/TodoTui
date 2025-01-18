@@ -1,11 +1,11 @@
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 
 use crate::{
-    states::{Screens, States},
+    states::{Screens, States, ALL_KEY_EDIT},
     todo::Todos,
 };
 
-fn handle_create_ui_events(todos: &mut Todos, states: &mut States, key: KeyEvent) {
+fn handle_create_ui_events(todos: &mut Todos, states: &mut States, key: KeyEvent, edit: bool) {
     if states.is_in_writting_mode() {
         if key.code == KeyCode::Esc {
             states.set_writting_mode(false);
@@ -25,15 +25,21 @@ fn handle_create_ui_events(todos: &mut Todos, states: &mut States, key: KeyEvent
     } else {
         match key.code {
             KeyCode::Esc | KeyCode::Char('q') => states.set_screen(Screens::Main),
-            KeyCode::Char('i') => states.set_writting_mode(true),
+            KeyCode::Char(ALL_KEY_EDIT) => states.set_writting_mode(true),
             KeyCode::Tab => states.next_tab(),
             KeyCode::Char('a') => {
-                todos.add(
-                    states.get_title().to_owned(),
-                    states.get_description().to_owned(),
-                    states.get_date().to_owned(),
-                    false,
-                );
+                if edit {
+                    if let Some(idx) = states.get_todo_list().selected() {
+                        todos.edit(idx, states);
+                    }
+                } else {
+                    todos.add(
+                        states.get_title().to_owned(),
+                        states.get_description().to_owned(),
+                        states.get_date().to_owned(),
+                        false,
+                    );
+                }
                 states.clear_strings();
                 states.set_screen(Screens::Main);
             }
@@ -54,6 +60,10 @@ fn handle_main_ui_events(
         KeyCode::Up => states.get_todo_list().scroll_up_by(1),
         KeyCode::Char('t') => todos.toggle(states.get_todo_list().selected().unwrap()),
         KeyCode::Char('d') => todos.delete(states.get_todo_list().selected().unwrap()),
+        KeyCode::Char(ALL_KEY_EDIT) => {
+            states.init_edit_mode(todos);
+            states.set_screen(Screens::Edit);
+        }
         _ => {}
     }
     Ok(false)
@@ -66,8 +76,9 @@ pub fn handle_events(todos: &mut Todos, states: &mut States) -> std::io::Result<
         }
 
         match states.get_screen() {
-            Screens::Create => handle_create_ui_events(todos, states, key),
             Screens::Main => return handle_main_ui_events(todos, states, key),
+            Screens::Create => handle_create_ui_events(todos, states, key, false),
+            Screens::Edit => handle_create_ui_events(todos, states, key, true),
         }
     }
     Ok(false)

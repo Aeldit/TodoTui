@@ -184,7 +184,7 @@ fn display_create_ui(frame: &mut Frame, states: &mut States) {
         Paragraph::new(match states.is_in_writting_mode() {
             true => String::from("Esc: exit writting mode"),
             false => format!(
-                "q/Esc: quit | Tab: cycle tab | {}: edit | a: add the TODO",
+                "q/Esc: quit | Tab: cycle tab | {}: edit | a: save",
                 ALL_KEY_EDIT
             ),
         })
@@ -207,5 +207,6 @@ pub fn draw(frame: &mut Frame, states: &mut States, todos: &mut Todos) {
     match states.get_screen() {
         Screens::Main => display_main_ui(frame, states, todos),
         Screens::Create => display_create_ui(frame, states),
+        Screens::Edit => display_create_ui(frame, states),
     }
 }
